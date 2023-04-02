@@ -4,8 +4,8 @@ import tkinter as tk
 import os
 
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.backends.tkagg as tkagg
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 import pygame
 
