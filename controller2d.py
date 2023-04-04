@@ -6,6 +6,7 @@
 
 import cutils
 import numpy as np
+import math
 
 class Controller2D(object):
     def __init__(self, waypoints):
@@ -52,6 +53,9 @@ class Controller2D(object):
         else:
             desired_speed = self._waypoints[-1][2]
         self._desired_speed = desired_speed
+
+    def get_nearest_way_points(self, x, y):
+        return [self._waypoints[0], self._waypoints[-1]]
 
     def update_waypoints(self, new_waypoints):
         self._waypoints = new_waypoints
@@ -166,6 +170,12 @@ class Controller2D(object):
             throttle_output = 0
             brake_output    = 0
 
+
+            PID_P = 2
+            LATERAL_K = 6
+
+            throttle_output = (v_desired - v) * PID_P
+
             ######################################################
             ######################################################
             # MODULE 7: IMPLEMENTATION OF LATERAL CONTROLLER HERE
@@ -177,11 +187,62 @@ class Controller2D(object):
                 example, can treat self.vars.v_previous like a "global variable".
             """
             
+
+
+            ref_1_point, ref_2_point = self.get_nearest_way_points(x, y)
+
+            # ax + by + c = 0 
+            # https://blog.csdn.net/qq_33328072/article/details/51655730
+
+            # a = y2-y1
+            a = ref_2_point[1] - ref_1_point[1]
+            
+            # b = x1-x2
+            b = ref_1_point[0] - ref_2_point[0]
+
+            # C = X2*Y1 - X1*Y2
+            c = ref_2_point[0]*ref_1_point[1] - ref_1_point[0]*ref_2_point[1]
+
+            ref_angle = np.arctan2(ref_2_point[1]-ref_1_point[1], ref_2_point[0]-ref_1_point[0])
+            heading_error = ref_angle - yaw
+
+            if heading_error > np.pi:
+                heading_error -= 2 * np.pi
+            if heading_error < - np.pi:
+                heading_error += 2 * np.pi
+
+        
+            # cross_track_error
+            # e = (a*x + b*y + c) / math.sqrt(a**2 + b**2)
+
+            current_xy = np.array([x, y])
+            crosstrack_error = np.min(np.sum((current_xy - np.array(waypoints)[:, :2])**2, axis=1))
+            yaw_cross_track = np.arctan2(y-waypoints[0][1], x-waypoints[0][0])
+            yaw_path2ct = ref_angle - yaw_cross_track
+            if yaw_path2ct > np.pi:
+                yaw_path2ct -= 2 * np.pi
+            if yaw_path2ct < - np.pi:
+                yaw_path2ct += 2 * np.pi
+            if yaw_path2ct > 0:
+                crosstrack_error = abs(crosstrack_error)
+            else:
+                crosstrack_error = - abs(crosstrack_error)
+
+            cross_track_steer = math.atan(LATERAL_K * crosstrack_error / v)
+
+  
+            steer_expect = cross_track_steer + heading_error
+            if steer_expect > np.pi:
+                steer_expect -= 2 * np.pi
+            if steer_expect < - np.pi:
+                steer_expect += 2 * np.pi
+
+
             # Change the steer output with the lateral controller. 
-            steer_output    = 0
+            steer_output    = steer_expect
 
             ######################################################
-            # SET CONTROLS OUTPUT
+            # SET CONTROLS OUTPUT  
             ######################################################
             self.set_throttle(throttle_output)  # in percent (0 to 1)
             self.set_steer(steer_output)        # in rad (-1.22 to 1.22)

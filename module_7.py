@@ -597,6 +597,12 @@ def exec_waypoint_nav_demo(args):
             new_waypoints = \
                     wp_interp[wp_interp_hash[waypoint_subset_first_index]:\
                               wp_interp_hash[waypoint_subset_last_index] + 1]
+            
+            # import matplotlib.pyplot as plt
+            # plt.plot([p[0] for p in new_waypoints], [p[1] for p in new_waypoints])
+            # plt.show()
+
+            # print("len of new_waypoints is:", len(new_waypoints))
             controller.update_waypoints(new_waypoints)
 
             # Update the other controller values and controls
