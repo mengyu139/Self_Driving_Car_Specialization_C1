@@ -213,22 +213,11 @@ class Controller2D(object):
 
         
             # cross_track_error
-            # e = (a*x + b*y + c) / math.sqrt(a**2 + b**2)
+            e = (a*x + b*y + c) / math.sqrt(a**2 + b**2)
 
-            current_xy = np.array([x, y])
-            crosstrack_error = np.min(np.sum((current_xy - np.array(waypoints)[:, :2])**2, axis=1))
-            yaw_cross_track = np.arctan2(y-waypoints[0][1], x-waypoints[0][0])
-            yaw_path2ct = ref_angle - yaw_cross_track
-            if yaw_path2ct > np.pi:
-                yaw_path2ct -= 2 * np.pi
-            if yaw_path2ct < - np.pi:
-                yaw_path2ct += 2 * np.pi
-            if yaw_path2ct > 0:
-                crosstrack_error = abs(crosstrack_error)
-            else:
-                crosstrack_error = - abs(crosstrack_error)
+            cross_track_steer = math.atan(LATERAL_K * e / v)
 
-            cross_track_steer = math.atan(LATERAL_K * crosstrack_error / v)
+            print("crosstrack_error:{:.3f}, e:{:.3f}".format(0, e))
 
   
             steer_expect = cross_track_steer + heading_error
