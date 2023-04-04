@@ -203,13 +203,16 @@ class Controller2D(object):
             # C = X2*Y1 - X1*Y2
             c = ref_2_point[0]*ref_1_point[1] - ref_1_point[0]*ref_2_point[1]
 
-            ref_angle = np.arctan2(ref_2_point[1]-ref_1_point[1], ref_2_point[0]-ref_1_point[0])
+            # ref_angle = np.arctan2(ref_2_point[1]-ref_1_point[1], ref_2_point[0]-ref_1_point[0])
+
+            ref_angle = math.atan2(ref_2_point[1]-ref_1_point[1], ref_2_point[0]-ref_1_point[0])
+
             heading_error = ref_angle - yaw
 
-            if heading_error > np.pi:
-                heading_error -= 2 * np.pi
-            if heading_error < - np.pi:
-                heading_error += 2 * np.pi
+            # if heading_error > np.pi:
+            #     heading_error -= 2 * np.pi
+            # if heading_error < - np.pi:
+            #     heading_error += 2 * np.pi
 
         
             # cross_track_error
@@ -221,10 +224,11 @@ class Controller2D(object):
 
   
             steer_expect = cross_track_steer + heading_error
-            if steer_expect > np.pi:
-                steer_expect -= 2 * np.pi
-            if steer_expect < - np.pi:
-                steer_expect += 2 * np.pi
+
+            # if steer_expect > np.pi:
+            #     steer_expect -= 2 * np.pi
+            # if steer_expect < - np.pi:
+            #     steer_expect += 2 * np.pi
 
 
             # Change the steer output with the lateral controller. 
